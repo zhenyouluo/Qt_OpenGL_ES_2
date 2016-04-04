@@ -14,10 +14,10 @@ GLWidget::GLWidget(QWidget *parent) :
     startAngleY = -30.0;
     startAngleZ = -7.0;
 
-    needRotateBase = true;
-    needRotateLeft = true;
-    needRotateRight = true;
-    needRotateMirror = true;
+    needRotateBase = false;
+    needRotateLeft = false;
+    needRotateRight = false;
+    needRotateMirror = false;
     rotationBaseDir = 1;
     rotationLeftDir = 1;
     rotationRightDir = 1;
@@ -159,31 +159,25 @@ void GLWidget::prepareTexture()
     // Calculate model view transformation
     QMatrix4x4 matrix;
     float offsetY = rotationMirror / 3000.0;
-    matrix.translate(0.0, offsetY, -0.15);
-
-    //matrix.rotate(-(startAngleX + 90) + rotationMirror, QVector3D(1,0,0));
-    matrix.rotate(-(90) + rotationMirror, QVector3D(1,0,0));
-    //matrix.rotate(startAngleZ, QVector3D(0,0,1));
+    matrix.translate(-0.005, -0.015 + offsetY, -0.13);
+    matrix.rotate(-(135) + rotationMirror, QVector3D(1,0,0));
     matrix.rotate(-rotationBase, QVector3D(0,1,0));
-    //matrix.rotate(startAngleZ, QVector3D(0,0,1));
-    matrix.scale(0.015);
+    matrix.scale(0.0105);
 
-    // Set modelview-projection matrix
+
     program.setUniformValue("mvp_matrix", projection * matrix);
-
-    //geometries->drawAxis(&program);
-    // Draw cube geometry
-
+    geometries->drawGeometry(&program, "base");
+    matrix.translate(1.0, -0.5, 0.0);
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
+
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "left");
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
+    matrix.translate(-2.0, 0.0, 0.0);
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "right");
-    matrix.rotate(-rotationRight, QVector3D(0,0,1));
-    program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "base");
+
 
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
@@ -226,7 +220,7 @@ void GLWidget::paintGL()
 
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    matrix.translate(0.5, 1.0, -13.0);
+    matrix.translate(0.5, 0.5, -13.0);
     matrix.rotate(startAngleY, QVector3D(0,1,0));
     matrix.rotate(startAngleX, QVector3D(1,0,0));
     matrix.rotate(startAngleZ, QVector3D(0,0,1));
@@ -236,17 +230,20 @@ void GLWidget::paintGL()
     matrix.rotate(rotationBase, QVector3D(0,1,0));
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "base");
+    matrix.translate(1.0, -0.5, 0.0);
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
+
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "left");
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
+    matrix.translate(-2.0, 0.0, 0.0);
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "right");
 
 
     QMatrix4x4 matrix2;
-    matrix2.translate(0.0, -1.5, -16.0);
+    matrix2.translate(0.0, -1.0, -13.0);
     matrix2.rotate(startAngleY, QVector3D(0,1,0));
     matrix2.rotate(startAngleX, QVector3D(1,0,0));
     matrix2.rotate(startAngleZ, QVector3D(0,0,1));
@@ -280,6 +277,44 @@ void GLWidget::detectCollision() {
         rotationRightTmp = rotationRight;
     }
 
+
+    QVector3D n = QVector3D::crossProduct(QVector3D(5,0,0),QVector3D(0,5*sin(rotationMirror * 3.14159265 / 180.0),5));
+
+    QMatrix4x4 matrixLeft = QMatrix4x4();
+    QVector3D p1 = QVector3D(-1.0, 4.0, -1.02);
+    matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
+    matrixLeft.rotate(rotationLeftTmp, QVector3D(0,0,1));
+    p1 = p1 * matrixLeft;
+    float d = abs(n.x()*p1.x() + (n.y()*p1.y() - 1.5 ) + n.z()*p1.z()) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
+    if(d < 0.1) {
+        collision = true;
+    }
+    QVector3D p2 = QVector3D(-1.0, 4.0, 1.02);
+    p2 = p2 * matrixLeft;
+    d = abs(n.x()*p2.x() + (n.y()*p2.y() - 1.5 ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
+    if(d < 0.1) {
+        collision = true;
+    }
+
+    QMatrix4x4 matrixRight = QMatrix4x4();
+    QVector3D p3 = QVector3D(1.0, 4.0, -1.01);
+    matrixRight.rotate(rotationBaseTmp, QVector3D(0,1,0));
+    matrixRight.rotate(rotationRightTmp, QVector3D(0,0,1));
+    p3 = p3 * matrixRight;
+    d = abs(n.x()*p3.x() + (n.y()*p3.y() - 1.5 ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
+    if(d < 0.1) {
+        collision = true;
+    }
+    QVector3D p4 = QVector3D(1.0, 4.0, 1.01);
+    p4 = p4 * matrixRight;
+    d = abs(n.x()*p4.x() + (n.y()*p4.y() - 1.5 ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
+    if(d < 0.1) {
+        collision = true;
+    }
+
+
+
+
     if(abs(rotationMirrorTmp) > 42) {
         collision = true;
     }
@@ -292,59 +327,67 @@ void GLWidget::detectCollision() {
 // Кнопка вращения всей фигуры по часовой стрелке
 void GLWidget::push_button1() {
      rotationBaseDir = 1;
+     needRotateBase = true;
 }
 
 // Кнопка вращения всей фигуры против часовой стрелки
 void GLWidget::push_button2() {
     rotationBaseDir = -1;
+    needRotateBase = true;
 }
 
 // Кнопка остановки фигуры
 void GLWidget::push_button3() {
-    needRotateBase = !needRotateBase;
+    needRotateBase = false;
 }
 
 // Кнопка вращения правого крыла вверх
 void GLWidget::push_button4() {
     rotationRightDir = 1;
+    needRotateRight = true;
 }
 
 // Кнопка вращения правого крыла вниз
 void GLWidget::push_button5() {
     rotationRightDir = -1;
+    needRotateRight = true;
 }
 
 // Кнопка остановки правого крыл
 void GLWidget::push_button6() {
-    needRotateRight = !needRotateRight;
+    needRotateRight = false;
 }
 
 // Кнопка вращения левого крыла вверх
 void GLWidget::push_button7() {
     rotationLeftDir = -1;
+    needRotateLeft = true;
 }
 
 // Кнопка вращения левого крыла вверх
 void GLWidget::push_button8() {
     rotationLeftDir = 1;
+    needRotateLeft = true;
 }
 
 // Кнопка остановки вращения левого крыла
 void GLWidget::push_button9() {
-    needRotateLeft = !needRotateLeft;
+    needRotateLeft = false;
 }
 
 // Кнопка вращения зеркала по часовой стрелке
 void GLWidget::push_button10() {
     rotationMirrorDir = 1;
+    needRotateMirror = true;
 }
 
 // Кнопка вращения зеркала против часовой стрелки
 void GLWidget::push_button11() {
     rotationMirrorDir = -1;
+    needRotateMirror = true;
 }
 
 // Кнопка остановки вращения зеркала
 void GLWidget::push_button12() {
-    needRotateMirror = !needRotateMirror;
+    needRotateMirror = false;
 }
