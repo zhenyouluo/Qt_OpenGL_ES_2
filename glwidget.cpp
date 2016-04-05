@@ -66,6 +66,8 @@ void GLWidget::timerEvent(QTimerEvent *)
             rotationLeft-= 360.0;
         } else if(rotationLeft < -360.0) {
             rotationLeft += 360.0;
+        } else if(rotationLeft > 0) {
+            rotationLeft = 0;
         }
     }
     if(needRotateRight) {
@@ -74,6 +76,8 @@ void GLWidget::timerEvent(QTimerEvent *)
             rotationRight-= 360.0;
         } else if(rotationRight < -360.0) {
             rotationRight += 360.0;
+        } else if(rotationRight < 0) {
+            rotationRight = 0;
         }
     }
     update();
@@ -161,19 +165,23 @@ void GLWidget::prepareTexture()
     float offsetY = rotationMirror / 3000.0;
     matrix.translate(-0.005, -0.015 + offsetY, -0.13);
     matrix.rotate(-(135) + rotationMirror, QVector3D(1,0,0));
-    matrix.rotate(-rotationBase, QVector3D(0,1,0));
+    matrix.rotate(-rotationBase + 180, QVector3D(0,1,0));
     matrix.scale(0.0105);
 
 
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "base");
-    matrix.translate(1.0, -0.5, 0.0);
+    matrix.translate(-1.0, -0.5, 0.0);
+    matrix.rotate(180, QVector3D(0,1,0));
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
 
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "left");
+
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
-    matrix.translate(-2.0, 0.0, 0.0);
+    matrix.rotate(-180, QVector3D(0,1,0));
+    matrix.translate(2.0, 0.0, 0.0);
+    matrix.rotate(180, QVector3D(0,1,0));
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "right");
@@ -278,36 +286,45 @@ void GLWidget::detectCollision() {
     }
 
 
-    QVector3D n = QVector3D::crossProduct(QVector3D(5,0,0),QVector3D(0,5*sin(rotationMirror * 3.14159265 / 180.0),5));
+    QVector3D n = QVector3D::crossProduct(QVector3D(0,1*sin(rotationMirror * 3.14159265 / 180.0),1), QVector3D(1,0,0));
 
     QMatrix4x4 matrixLeft = QMatrix4x4();
+
     QVector3D p1 = QVector3D(-1.0, 4.0, -1.02);
-    matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
+    //matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixLeft.rotate(rotationLeftTmp, QVector3D(0,0,1));
-    p1 = p1 * matrixLeft;
-    float d = abs(n.x()*p1.x() + (n.y()*p1.y() - 1.5 ) + n.z()*p1.z()) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
+    //matrixLeft.
+    p1 = QVector3D( p1.x()*matrixLeft.row(1).x() + p1.y()*matrixLeft.row(1).y() + p1.z()*matrixLeft.row(1).z(),
+                    p1.x()*matrixLeft.row(2).x() + p1.y()*matrixLeft.row(2).y() + p1.z()*matrixLeft.row(2).z(),
+                    p1.x()*matrixLeft.row(3).x() + p1.y()*matrixLeft.row(3).y() + p1.z()*matrixLeft.row(3).z() );
+    //p1 = matrixLeft.mapVector(p1);
+    qDebug() << p1;
+    //p1 = p1 * matrixLeft;
+    float d = abs(n.x()*p1.x() + (n.y()*p1.y() ) + n.z()*p1.z() - 0.5) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
+
     if(d < 0.1) {
         collision = true;
     }
-    QVector3D p2 = QVector3D(-1.0, 4.0, 1.02);
-    p2 = p2 * matrixLeft;
-    d = abs(n.x()*p2.x() + (n.y()*p2.y() - 1.5 ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
+
+    QVector3D p2 = QVector3D(-1.0, 2.5, 1.02);
+    p2 = matrixLeft.mapVector(p2);
+    d = abs(n.x()*p2.x() + (n.y()*p2.y() ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
     if(d < 0.1) {
-        collision = true;
+        //collision = true;
     }
 
     QMatrix4x4 matrixRight = QMatrix4x4();
-    QVector3D p3 = QVector3D(1.0, 4.0, -1.01);
+    QVector3D p3 = QVector3D(1.0, 2.5, -1.01);
     matrixRight.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixRight.rotate(rotationRightTmp, QVector3D(0,0,1));
-    p3 = p3 * matrixRight;
-    d = abs(n.x()*p3.x() + (n.y()*p3.y() - 1.5 ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
+    p3 = matrixRight.mapVector(p3);
+    d = abs(n.x()*p3.x() + (n.y()*p3.y() ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
     if(d < 0.1) {
         collision = true;
     }
     QVector3D p4 = QVector3D(1.0, 4.0, 1.01);
-    p4 = p4 * matrixRight;
-    d = abs(n.x()*p4.x() + (n.y()*p4.y() - 1.5 ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
+    p4 = matrixRight.mapVector(p4);
+    d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
     if(d < 0.1) {
         collision = true;
     }
@@ -315,7 +332,7 @@ void GLWidget::detectCollision() {
 
 
 
-    if(abs(rotationMirrorTmp) > 42) {
+    if(rotationMirrorTmp > 30 || rotationMirrorTmp > -40) {
         collision = true;
     }
 
