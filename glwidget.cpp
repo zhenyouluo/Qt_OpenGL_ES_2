@@ -303,7 +303,7 @@ void GLWidget::detectCollision() {
     float d = abs(n.x()*p1.x() + (n.y()*p1.y() ) + n.z()*p1.z() - 0.5) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
 
     if(d < 0.1) {
-        collision = true;
+        //collision = true;
     }
 
     QVector3D p2 = QVector3D(-1.0, 2.5, 1.02);
@@ -326,13 +326,13 @@ void GLWidget::detectCollision() {
     p4 = matrixRight.mapVector(p4);
     d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
     if(d < 0.1) {
-        collision = true;
+        //collision = true;
     }
 
 
 
 
-    if(rotationMirrorTmp > 30 || rotationMirrorTmp > -40) {
+    if(rotationMirrorTmp > 30 || rotationMirrorTmp < -40) {
         collision = true;
     }
 
