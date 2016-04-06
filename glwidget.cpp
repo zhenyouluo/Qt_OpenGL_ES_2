@@ -312,6 +312,7 @@ void GLWidget::detectCollision() {
     //qDebug() << p1.y();
     if(p1.y() < -1.5) {
         collisionLeft = true;
+        collisionBase = true;
     }
 
     QVector3D p2 = QVector3D(2, 3, -1);
@@ -319,6 +320,7 @@ void GLWidget::detectCollision() {
     float d = abs(n.x()*p2.x() + (n.y()*p2.y() ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
     if(p2.y() < -1.5) {
         collisionLeft = true;
+        collisionBase = true;
     }
 
     QMatrix4x4 matrixRight = QMatrix4x4();
@@ -331,12 +333,14 @@ void GLWidget::detectCollision() {
     d = abs(n.x()*p3.x() + (n.y()*p3.y() ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
     if(p3.y() < -1.5) {
         collisionRight = true;
+        collisionBase = true;
     }
     QVector3D p4 = QVector3D(-2, 3, -1);
     p4 = matrixRight.mapVector(p4);
     d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
     if(p4.y() < -1.5) {
         collisionRight = true;
+        collisionBase = true;
     }
 
 
