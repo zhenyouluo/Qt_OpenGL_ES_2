@@ -297,7 +297,7 @@ void GLWidget::detectCollision() {
 
     QMatrix4x4 matrixLeft = QMatrix4x4();
 
-    QVector3D p1 = QVector3D(2, 3, 1);
+    QVector3D p1 = QVector3D(2.5, 3, 1);
     matrixLeft.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixLeft.rotate(rotationLeftTmp, QVector3D(0,0,1));
@@ -315,7 +315,7 @@ void GLWidget::detectCollision() {
         collisionBase = true;
     }
 
-    QVector3D p2 = QVector3D(2, 3, -1);
+    QVector3D p2 = QVector3D(2.5, 3, -1);
     p2 = matrixLeft.mapVector(p2);
     float d = abs(n.x()*p2.x() + (n.y()*p2.y() ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
     if(p2.y() < -1.5) {
@@ -324,7 +324,7 @@ void GLWidget::detectCollision() {
     }
 
     QMatrix4x4 matrixRight = QMatrix4x4();
-    QVector3D p3 = QVector3D(-2, 3, 1);
+    QVector3D p3 = QVector3D(-1.5, 3, 1);
     matrixRight.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixRight.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixRight.rotate(rotationRightTmp, QVector3D(0,0,1));
@@ -335,7 +335,7 @@ void GLWidget::detectCollision() {
         collisionRight = true;
         collisionBase = true;
     }
-    QVector3D p4 = QVector3D(-2, 3, -1);
+    QVector3D p4 = QVector3D(-1.5, 3, -1);
     p4 = matrixRight.mapVector(p4);
     d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
     if(p4.y() < -1.5) {
