@@ -23,7 +23,9 @@ GLWidget::GLWidget(QWidget *parent) :
     rotationRightDir = 1;
     rotationMirrorDir = 1;
 
-    collision = false;
+    collisionBase = false;
+    collisionLeft = false;
+    collisionRight = false;
 }
 
 GLWidget::~GLWidget()
@@ -40,11 +42,11 @@ void GLWidget::timerEvent(QTimerEvent *)
 {
 
     detectCollision();
-    if(collision) {
-        return;
-    }
+    //if(collision) {
+    //    return;
+    //}
 
-    if(needRotateBase) {
+    if(needRotateBase && !collisionBase) {
         rotationBase+=angularSpeed * rotationBaseDir;
         if(rotationBase > 360.0) {
             rotationBase -= 360.0;
@@ -53,14 +55,16 @@ void GLWidget::timerEvent(QTimerEvent *)
         }
     }
     if(needRotateMirror) {
-        rotationMirror+=angularSpeed * rotationMirrorDir;
-        if(rotationMirror > 360.0) {
-            rotationMirror -= 360.0;
-        } else if(rotationMirror < -360.0) {
-            rotationMirror += 360.0;
+        if(!collisionBase && !collisionLeft && !collisionRight) {
+            rotationMirror+=angularSpeed * rotationMirrorDir;
+            if(rotationMirror > 360.0) {
+                rotationMirror -= 360.0;
+            } else if(rotationMirror < -360.0) {
+                rotationMirror += 360.0;
+            }
         }
     }
-    if(needRotateLeft) {
+    if(needRotateLeft && !collisionLeft) {
         rotationLeft+=angularSpeed * rotationLeftDir;
         if(rotationLeft > 360.0) {
             rotationLeft-= 360.0;
@@ -70,7 +74,7 @@ void GLWidget::timerEvent(QTimerEvent *)
             rotationLeft = 0;
         }
     }
-    if(needRotateRight) {
+    if(needRotateRight && !collisionRight) {
         rotationRight+=angularSpeed * rotationRightDir;
         if(rotationRight > 360.0) {
             rotationRight-= 360.0;
@@ -154,7 +158,8 @@ void GLWidget::prepareTexture()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 
-    glClearColor(0.87, 1, 1, 1);
+    //glClearColor(0.92, 1, 1, 1);
+    //glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(program.programId());
@@ -203,7 +208,7 @@ void GLWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 0.1, zFar =47.0, fov = 45.0;
+    const qreal zNear = 0.001, zFar =47.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -267,7 +272,9 @@ void GLWidget::paintGL()
 }
 
 void GLWidget::detectCollision() {
-    collision = false;
+    collisionBase = false;
+    collisionLeft = false;
+    collisionRight = false;
     qreal rotationBaseTmp = rotationBase + angularSpeed * rotationBaseDir;
     if(!needRotateBase) {
         rotationBaseTmp = rotationBase;
@@ -290,7 +297,7 @@ void GLWidget::detectCollision() {
 
     QMatrix4x4 matrixLeft = QMatrix4x4();
 
-    QVector3D p1 = QVector3D(2, 3, 0);
+    QVector3D p1 = QVector3D(2, 3, 1);
     matrixLeft.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixLeft.rotate(rotationLeftTmp, QVector3D(0,0,1));
@@ -304,18 +311,18 @@ void GLWidget::detectCollision() {
     //float d = abs(n.x()*p1.x() + (n.y()*p1.y() ) + n.z()*p1.z()) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
     //qDebug() << p1.y();
     if(p1.y() < -1.5) {
-        collision = true;
+        collisionLeft = true;
     }
 
-    QVector3D p2 = QVector3D(2, 3, 0);
+    QVector3D p2 = QVector3D(2, 3, -1);
     p2 = matrixLeft.mapVector(p2);
     float d = abs(n.x()*p2.x() + (n.y()*p2.y() ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
     if(p2.y() < -1.5) {
-        collision = true;
+        collisionLeft = true;
     }
 
     QMatrix4x4 matrixRight = QMatrix4x4();
-    QVector3D p3 = QVector3D(-2, 3, 0);
+    QVector3D p3 = QVector3D(-2, 3, 1);
     matrixRight.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixRight.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixRight.rotate(rotationRightTmp, QVector3D(0,0,1));
@@ -323,13 +330,13 @@ void GLWidget::detectCollision() {
 
     d = abs(n.x()*p3.x() + (n.y()*p3.y() ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
     if(p3.y() < -1.5) {
-        collision = true;
+        collisionRight = true;
     }
-    QVector3D p4 = QVector3D(-2, 3, 0);
+    QVector3D p4 = QVector3D(-2, 3, -1);
     p4 = matrixRight.mapVector(p4);
     d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
     if(p4.y() < -1.5) {
-        collision = true;
+        collisionRight = true;
     }
 
 
@@ -338,7 +345,7 @@ void GLWidget::detectCollision() {
 
 
     if(rotationMirrorTmp > 30 || rotationMirrorTmp < -40) {
-        collision = true;
+        collisionBase = true;
     }
 
 

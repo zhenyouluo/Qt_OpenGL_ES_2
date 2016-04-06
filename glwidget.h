@@ -80,8 +80,9 @@ private:
     int rotationRightDir;
     int rotationMirrorDir;
 
-    bool collision;
-
+    bool collisionBase;
+    bool collisionLeft;
+    bool collisionRight;
 };
 
 #endif // GLWIDGET_H
