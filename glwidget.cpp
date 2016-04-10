@@ -256,7 +256,7 @@ void GLWidget::paintGL()
 
 
     QMatrix4x4 matrix2;
-    matrix2.translate(0.0, -1.0, -13.0);
+    matrix2.translate(0.5, -1.0, -13.0);
     matrix2.rotate(startAngleY, QVector3D(0,1,0));
     matrix2.rotate(startAngleX, QVector3D(1,0,0));
     matrix2.rotate(startAngleZ, QVector3D(0,0,1));
@@ -297,12 +297,18 @@ void GLWidget::detectCollision() {
 
     QMatrix4x4 matrixLeft = QMatrix4x4();
 
-    QVector3D p1 = QVector3D(2.5, 3, 1);
+    QVector3D p1 = QVector3D(2.5, 2.5, 1);
     matrixLeft.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixLeft.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixLeft.rotate(rotationLeftTmp, QVector3D(0,0,1));
     //
     p1 = matrixLeft.mapVector(p1);
+    float borderLeft = -2.3;
+    if(abs(rotationMirrorTmp) > 30.0) {
+        borderLeft = -1.8;
+    } else if(abs(rotationMirrorTmp) > 19.0) {
+        borderLeft = -2.05;
+    }
 
 
     //p1 = matrixLeft.mapVector(p1);
@@ -310,35 +316,41 @@ void GLWidget::detectCollision() {
     //p1 = p1 * matrixLeft;
     //float d = abs(n.x()*p1.x() + (n.y()*p1.y() ) + n.z()*p1.z()) / sqrt(p1.x()*p1.x() + p1.y()*p1.y() + p1.z()*p1.z());
     //qDebug() << p1.y();
-    if(p1.y() < -1.5) {
+    if(p1.y() < borderLeft) {
         collisionLeft = true;
         collisionBase = true;
     }
 
-    QVector3D p2 = QVector3D(2.5, 3, -1);
+    QVector3D p2 = QVector3D(2.5, 2.5, -1);
     p2 = matrixLeft.mapVector(p2);
     float d = abs(n.x()*p2.x() + (n.y()*p2.y() ) + n.z()*p2.z()) / sqrt(p2.x()*p2.x() + p2.y()*p2.y() + p2.z()*p2.z());
-    if(p2.y() < -1.5) {
+    if(p2.y() < borderLeft) {
         collisionLeft = true;
         collisionBase = true;
     }
 
     QMatrix4x4 matrixRight = QMatrix4x4();
-    QVector3D p3 = QVector3D(-2.2, 3, 1);
+    QVector3D p3 = QVector3D(-2.5, 2.5, 1);
     matrixRight.rotate(-rotationMirrorTmp, QVector3D(1,0,0));
     matrixRight.rotate(rotationBaseTmp, QVector3D(0,1,0));
     matrixRight.rotate(rotationRightTmp, QVector3D(0,0,1));
     p3 = matrixRight.mapVector(p3);
+    float borderRight = -2.3;
+    if(abs(rotationMirrorTmp) > 30.0) {
+        borderRight = -1.8;
+    } else if(abs(rotationMirrorTmp) > 19.0) {
+        borderRight = -2.05;
+    }
 
     d = abs(n.x()*p3.x() + (n.y()*p3.y() ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());
-    if(p3.y() < -1.5) {
+    if(p3.y() < borderRight) {
         collisionRight = true;
         collisionBase = true;
     }
-    QVector3D p4 = QVector3D(-2.2, 3, -1);
+    QVector3D p4 = QVector3D(-2.5, 2.5, -1);
     p4 = matrixRight.mapVector(p4);
     d = abs(n.x()*p4.x() + (n.y()*p4.y() ) + n.z()*p4.z()) / sqrt(p4.x()*p4.x() + p4.y()*p4.y() + p4.z()*p4.z());
-    if(p4.y() < -1.5) {
+    if(p4.y() < borderRight) {
         collisionRight = true;
         collisionBase = true;
     }
@@ -348,7 +360,7 @@ void GLWidget::detectCollision() {
 
 
 
-    if(rotationMirrorTmp > 30 || rotationMirrorTmp < -40) {
+    if(rotationMirrorTmp > 35 || rotationMirrorTmp < -35) {
         collisionBase = true;
     }
 
