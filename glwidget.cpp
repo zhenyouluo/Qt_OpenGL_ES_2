@@ -176,17 +176,18 @@ void GLWidget::prepareTexture()
 
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "base");
-    matrix.translate(-1.0, -0.5, 0.0);
-    matrix.rotate(180, QVector3D(0,1,0));
+    matrix.rotate(-180, QVector3D(0,1,0));
+    matrix.translate(1.0, -0.5, 0.0);
+    matrix.rotate(0, QVector3D(0,1,0));
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
 
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "left");
 
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
-    matrix.rotate(-180, QVector3D(0,1,0));
-    matrix.translate(2.0, 0.0, 0.0);
-    matrix.rotate(180, QVector3D(0,1,0));
+    matrix.rotate(0, QVector3D(0,1,0));
+    matrix.translate(-2.0, 0.0, 0.0);
+    matrix.rotate(0, QVector3D(0,1,0));
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
     geometries->drawGeometry(&program, "right");
