@@ -22,8 +22,10 @@ GeometryEngine::GeometryEngine()
      initBaseGeometry();
 
      arrayBufLeft.create();
+     arrayBufMirrorLeft.create();
      indexBufLeft.create();
      arrayBufRight.create();
+     arrayBufMirrorRight.create();
      indexBufRight.create();
      initLeftGeometry();
      initRightGeometry();
@@ -42,9 +44,11 @@ GeometryEngine::GeometryEngine()
      indexBufBase.destroy();
 
      arrayBufLeft.destroy();
+     arrayBufMirrorLeft.destroy();
      indexBufLeft.destroy();
 
      arrayBufRight.destroy();
+     arrayBufMirrorRight.create();
      indexBufRight.destroy();
 
      arrayBufMirror.destroy();
@@ -154,6 +158,48 @@ GeometryEngine::GeometryEngine()
 
      };
 
+     VertexData verticesMirror[] = {
+         // Нижняя грань
+         {QVector3D(0.0f, 0.0f, -1.01f), QVector4D(1.0f, 0.0f, 1.0f, 1.0f)}, // v4
+         {QVector3D(0.0f, 0.0f,  1.01f), QVector4D(1.0f, 0.0f, 1.0f, 1.0f)},  // v1
+         {QVector3D(-1.0f,  1.0f, -1.01f), QVector4D(1.0f, 0.0f, 1.0f, 1.0f)}, // v5
+         {QVector3D(-1.0f,  1.0f,  1.01f), QVector4D(1.0f, 0.0f, 1.0f, 1.0f)},  // v0
+
+         // Передняя грань
+         {QVector3D(-1.0f,  1.0f,  1.01f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f)}, // v0
+         {QVector3D(0.0f, 0.0f,  1.01f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f)}, // v1
+         {QVector3D( 1.0f, 4.0f, 1.01f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f)},  // v2
+         {QVector3D( 1.0f,  2.5f,  1.01f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f)}, // v3
+
+         // Задняя грань
+         {QVector3D(0.0f, 0.0f,  -1.01f), QVector4D(0.9f, 1.0f, 0.0f, 1.0f)}, // v4
+         {QVector3D(-1.0f,  1.0f,  -1.01f), QVector4D(0.9f, 1.0f, 0.0f, 1.0f)},  // v5
+         {QVector3D( 1.0f,  2.5f,  -1.01f), QVector4D(0.9f, 1.0f, 0.0f, 1.0f)}, // v6
+         {QVector3D( 1.0f, 4.0f, -1.01f), QVector4D(0.9f, 1.0f, 0.0f, 1.0f)},  // v7
+
+         // Верхняя грань
+         {QVector3D( 1.0f,  2.5f,  1.01f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f)}, // v3
+         {QVector3D( 1.0f,  2.5f,  -1.01f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f)},  // v6
+         {QVector3D( 1.0f, 4.0f, 1.01f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f)}, // v2
+         {QVector3D( 1.0f, 4.0f, -1.01f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f)},  // v7
+
+         // Правая грань
+         {QVector3D(-1.0f,  1.0f,  -1.01f), QVector4D(0.5f, 0.5f, 0.5f, 1.0f)}, // v5
+         {QVector3D(-1.0f,  1.0f,  1.01f), QVector4D(0.5f, 0.5f, 0.5f, 1.0f)}, // v0
+         {QVector3D( 1.0f, 4.0f, -1.01f), QVector4D(0.5f, 0.5f, 0.5f, 1.0f)}, // v7
+         {QVector3D( 1.0f, 4.0f, 1.01f), QVector4D(0.5f, 0.5f, 0.5f, 1.0f)}, // v2
+
+         // Левая грань
+         {QVector3D(1.0f,  2.5f,  -1.01f), QVector4D(1.0f, 0.84f, 0.0f, 1.0f)}, // v6
+         {QVector3D(1.0f,  2.5f,  1.01f), QVector4D(1.0f, 0.84f, 0.0f, 1.0f)}, // v3
+         {QVector3D(0.0f, 0.0f,  -1.01f), QVector4D(1.0f, 0.84f, 0.0f, 1.0f)}, // v4
+         {QVector3D(0.0f, 0.0f, 1.01f), QVector4D(1.0f, 0.84f, 0.0f, 1.0f)}  // v1
+
+     };
+
+
+
+
      // Indices for drawing cube faces using triangle strips.
      // Triangle strips can be connected by duplicating indices
      // between the strips. If connecting strips have opposite
@@ -174,6 +220,9 @@ GeometryEngine::GeometryEngine()
      // Transfer vertex data to VBO 0
      arrayBufLeft.bind();
      arrayBufLeft.allocate(vertices, 24 * sizeof(VertexData));
+
+     arrayBufMirrorLeft.bind();
+     arrayBufMirrorLeft.allocate(verticesMirror, 24 * sizeof(VertexData));
 
      // Transfer index data to VBO 1
      indexBufLeft.bind();
@@ -224,6 +273,45 @@ GeometryEngine::GeometryEngine()
 
      };
 
+     VertexData verticesMirror[] = {
+         // Нижняя грань
+         {QVector3D(0.0f, 0.0f,  1.02f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f)}, // v0
+         {QVector3D(0.0f, 0.0f, -1.02f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f)},  // v5
+         {QVector3D(1.0f,  1.0f,  1.02f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f)}, // v1
+         {QVector3D(1.0f,  1.0f, -1.02f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f)},  // v4
+
+         // Передняя грань
+         {QVector3D(0.0f, 0.0f,  1.02f), QVector4D(0.62f, 0.12f, 0.94f, 1.0f)}, // v0
+         {QVector3D(1.0f,  1.0f,  1.02f), QVector4D(0.62f, 0.12f, 0.94f, 1.0f)}, // v1
+         {QVector3D( -1.0f,  2.5f,  1.02f), QVector4D(0.62f, 0.12f, 0.94f, 1.0f)},  // v2
+         {QVector3D( -1.0f, 4.0f, 1.02f), QVector4D(0.62f, 0.12f, 0.94f, 1.0f)}, // v3
+
+         // Задняя грань
+         {QVector3D(1.0f,  1.0f,  -1.02f), QVector4D(1.0f, 0.4, 0.7f, 1.0f)}, // v4
+         {QVector3D(0.0f, 0.0f,  -1.02f), QVector4D(1.0f, 0.4, 0.7f, 1.0f)},  // v5
+         {QVector3D( -1.0f, 4.0f, -1.02f), QVector4D(1.0f, 0.4, 0.7f, 1.0f)}, // v6
+         {QVector3D( -1.0f,  2.5f,  -1.02f), QVector4D(1.0f, 0.4, 0.7f, 1.0f)},  // v7
+
+         // Верхняя грань
+         {QVector3D( -1.0f,  2.5f,  -1.02f), QVector4D(0.8f, 0.41f, 0.22f, 1.0f)}, // v7
+         {QVector3D( -1.0f,  2.5f,  1.02f), QVector4D(0.8f, 0.41f, 0.22f, 1.0f)},  // v2
+         {QVector3D( -1.0f, 4.0f, -1.02f), QVector4D(0.8f, 0.41f, 0.22f, 1.0f)}, // v6
+         {QVector3D( -1.0f, 4.0f, 1.02f), QVector4D(0.8f, 0.41f, 0.22f, 1.0f)},  // v3
+
+         // Правая грань
+         {QVector3D(1.0f,  1.0f,  1.02f), QVector4D(0.6f, 1.0f, 0.0f, 1.0f)}, // v1
+         {QVector3D(1.0f,  1.0f,  -1.02f), QVector4D(0.6f, 1.0f, 0.0f, 1.0f)}, // v4
+         {QVector3D( -1.0f, 4.0f, 1.02f), QVector4D(0.6f, 1.0f, 0.0f, 1.0f)}, // v3
+         {QVector3D( -1.0f, 4.0f, -1.02f), QVector4D(0.6f, 1.0f, 0.0f, 1.0f)}, // v6
+
+         // Левая грань
+         {QVector3D(-1.0f,  2.5f,  1.02f), QVector4D(0.5f, 1.0f, 0.0f, 1.0f)}, // v2
+         {QVector3D(-1.0f,  2.5f,  -1.02f), QVector4D(0.5f, 1.0f, 0.0f, 1.0f)}, // v7
+         {QVector3D(0.0f, 0.0f, 1.02f), QVector4D(0.5f, 1.0f, 0.0f, 1.0f)}, // v0
+         {QVector3D(0.0f, 0.0f,  -1.02f), QVector4D(0.5f, 1.0f, 0.0f, 1.0f)}  // v5
+
+     };
+
 
      // Indices for drawing cube faces using triangle strips.
      // Triangle strips can be connected by duplicating indices
@@ -245,6 +333,9 @@ GeometryEngine::GeometryEngine()
      // Transfer vertex data to VBO 0
      arrayBufRight.bind();
      arrayBufRight.allocate(vertices, 24 * sizeof(VertexData));
+
+     arrayBufMirrorRight.bind();
+     arrayBufMirrorRight.allocate(verticesMirror, 24 * sizeof(VertexData));
 
      // Transfer index data to VBO 1
      indexBufRight.bind();
@@ -304,13 +395,21 @@ GeometryEngine::GeometryEngine()
 
 
 
- void GeometryEngine::drawGeometry(QOpenGLShaderProgram *program, QString name){
+ void GeometryEngine::drawGeometry(QOpenGLShaderProgram *program, QString name, bool mirror){
      if(name == "base") {
         drawNamedGeometry(program, arrayBufBase, indexBufBase, 29);
      } else if(name == "left") {
-        drawNamedGeometry(program, arrayBufLeft, indexBufLeft, 34);
+         if(mirror) {
+             drawNamedGeometry(program, arrayBufMirrorLeft, indexBufLeft, 34);
+         } else {
+             drawNamedGeometry(program, arrayBufLeft, indexBufLeft, 34);
+         }
      } else if(name == "right") {
-        drawNamedGeometry(program, arrayBufRight, indexBufRight, 34);
+         if(mirror) {
+             drawNamedGeometry(program, arrayBufMirrorRight, indexBufRight, 34);
+         } else {
+             drawNamedGeometry(program, arrayBufRight, indexBufRight, 34);
+         }
      }
  }
 /*

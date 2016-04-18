@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
 #ifndef QT_NO_OPENGL
     MainWindow widget;
-    widget.setWindowTitle("НА ЧТО Я ТРАЧУ 5К");
+    widget.setWindowTitle("OpenGL example with collision detection");
     widget.setFixedSize(1000, 720);
     widget.show();
 #else

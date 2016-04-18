@@ -175,14 +175,14 @@ void GLWidget::prepareTexture()
 
 
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "base");
+    geometries->drawGeometry(&program, "base", false);
     matrix.rotate(-180, QVector3D(0,1,0));
     matrix.translate(1.0, -0.5, 0.0);
     matrix.rotate(0, QVector3D(0,1,0));
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
 
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "left");
+    geometries->drawGeometry(&program, "left", true);
 
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
     matrix.rotate(0, QVector3D(0,1,0));
@@ -190,7 +190,7 @@ void GLWidget::prepareTexture()
     matrix.rotate(0, QVector3D(0,1,0));
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "right");
+    geometries->drawGeometry(&program, "right", true);
 
 
 
@@ -243,17 +243,17 @@ void GLWidget::paintGL()
 
     matrix.rotate(rotationBase, QVector3D(0,1,0));
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "base");
+    geometries->drawGeometry(&program, "base", false);
     matrix.translate(1.0, -0.5, 0.0);
     matrix.rotate(rotationLeft, QVector3D(0,0,1));
 
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "left");
+    geometries->drawGeometry(&program, "left", false);
     matrix.rotate(-rotationLeft, QVector3D(0,0,1));
     matrix.translate(-2.0, 0.0, 0.0);
     matrix.rotate(rotationRight, QVector3D(0,0,1));
     program.setUniformValue("mvp_matrix", projection * matrix);
-    geometries->drawGeometry(&program, "right");
+    geometries->drawGeometry(&program, "right", false);
 
 
     QMatrix4x4 matrix2;
@@ -305,10 +305,22 @@ void GLWidget::detectCollision() {
     //
     p1 = matrixLeft.mapVector(p1);
     float borderLeft = -2.3;
+    qDebug() << rotationBaseTmp << ' ' << rotationMirrorTmp;
     if(abs(rotationMirrorTmp) > 30.0) {
-        borderLeft = -1.8;
+        borderLeft = -1.75;
     } else if(abs(rotationMirrorTmp) > 19.0) {
         borderLeft = -2.05;
+    }
+    if((rotationBaseTmp > 20 && rotationBaseTmp < 140) || (rotationBaseTmp > -220 && rotationBaseTmp < -340)) {
+        if(rotationMirrorTmp < -30) {
+            borderLeft = -2.8;
+        } else if(rotationMirrorTmp < -20) {
+            borderLeft = -2.7;
+        } else if(rotationMirrorTmp < -10) {
+            borderLeft = -2.6;
+        } else if(rotationMirrorTmp < -5) {
+            borderLeft = -2.5;
+        }
     }
 
 
@@ -338,9 +350,20 @@ void GLWidget::detectCollision() {
     p3 = matrixRight.mapVector(p3);
     float borderRight = -2.3;
     if(abs(rotationMirrorTmp) > 30.0) {
-        borderRight = -1.8;
+        borderRight = -1.75;
     } else if(abs(rotationMirrorTmp) > 19.0) {
         borderRight = -2.05;
+    }
+    if((rotationBaseTmp > -140 && rotationBaseTmp < -20)  || (rotationBaseTmp > 220 && rotationBaseTmp < 340)) {
+        if(rotationMirrorTmp < -30) {
+            borderRight = -2.8;
+        } else if(rotationMirrorTmp < -20) {
+            borderRight = -2.7;
+        } else if(rotationMirrorTmp < -10) {
+            borderRight = -2.6;
+        } else if(rotationMirrorTmp < -5) {
+            borderRight = -2.5;
+        }
     }
 
     d = abs(n.x()*p3.x() + (n.y()*p3.y() ) + n.z()*p3.z()) / sqrt(p3.x()*p3.x() + p3.y()*p3.y() + p3.z()*p3.z());

@@ -12,7 +12,7 @@ public:
     GeometryEngine();
     virtual ~GeometryEngine();
 
-    void drawGeometry(QOpenGLShaderProgram *program, QString name);
+    void drawGeometry(QOpenGLShaderProgram *program, QString name, bool mirror);
     void drawMirror(QOpenGLShaderProgram *program);
     void drawAxis(QOpenGLShaderProgram *program);
 
@@ -29,9 +29,11 @@ private:
     QOpenGLBuffer indexBufBase;
 
     QOpenGLBuffer arrayBufLeft;
+    QOpenGLBuffer arrayBufMirrorLeft;
     QOpenGLBuffer indexBufLeft;
 
     QOpenGLBuffer arrayBufRight;
+    QOpenGLBuffer arrayBufMirrorRight;
     QOpenGLBuffer indexBufRight;
 
     QOpenGLBuffer arrayBufMirror;
